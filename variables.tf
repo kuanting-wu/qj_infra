@@ -7,5 +7,5 @@ variable "github_repo" {
 
 variable "s3_bucket_name" {
   description = "S3 bucket name for the Vue.js site"
-  default     = "quantify-jiujitsu-bucket"
+  default     = "quantifyjiujitsu.com"
 }

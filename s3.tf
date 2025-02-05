@@ -1,6 +1,6 @@
 # S3 bucket for hosting a Vue.js website
 resource "aws_s3_bucket" "vue_website" {
-  bucket = "quantify-jiujitsu-bucket" # Must be globally unique
+  bucket = "quantifyjiujitsu.com" # Must be globally unique
 
   tags = {
     Name = "Quantify Jiujitsu Website Bucket"
