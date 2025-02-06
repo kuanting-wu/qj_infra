@@ -42,17 +42,6 @@ resource "aws_s3_bucket_website_configuration" "example" {
   }
 
   error_document {
-    key = "error.html"
+    key = "index.html"
   }
-
-  routing_rules = <<EOF
-[{
-    "Condition": {
-        "KeyPrefixEquals": "docs/"
-    },
-    "Redirect": {
-        "ReplaceKeyPrefixWith": ""
-    }
-}]
-EOF
 }
