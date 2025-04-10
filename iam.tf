@@ -128,7 +128,7 @@ resource "aws_iam_role" "lambda_exec" {
 
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda_execution_policy"
-  description = "Lambda execution policy with permissions for RDS, CloudWatch logs, and SES"
+  description = "Lambda execution policy with permissions for RDS, CloudWatch logs, S3, and SES"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -166,6 +166,28 @@ resource "aws_iam_policy" "lambda_policy" {
           "ses:SendRawEmail"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.markdown_notes.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "${aws_s3_bucket.avatar_bucket.arn}",
+          "${aws_s3_bucket.avatar_bucket.arn}/*"
+        ]
       }
     ]
   })

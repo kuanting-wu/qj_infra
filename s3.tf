@@ -176,3 +176,82 @@ resource "aws_s3_bucket_cors_configuration" "markdown_notes_cors" {
     max_age_seconds = 3000
   }
 }
+
+# S3 bucket for storing user avatar images
+resource "aws_s3_bucket" "avatar_bucket" {
+  bucket = "qj-user-avatars" # Must be globally unique
+  
+  tags = {
+    Name = "Quantify Jiujitsu User Avatars Bucket"
+  }
+}
+
+# Block public access for avatar bucket
+resource "aws_s3_bucket_public_access_block" "avatar_bucket_access" {
+  bucket = aws_s3_bucket.avatar_bucket.id
+
+  # We'll use signed URLs for uploads, but allow public read access
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+# Bucket policy for avatar bucket to allow public read access
+resource "aws_s3_bucket_policy" "avatar_bucket_policy" {
+  bucket = aws_s3_bucket.avatar_bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.avatar_bucket.arn}/*"
+      }
+    ]
+  })
+  depends_on = [aws_s3_bucket_public_access_block.avatar_bucket_access]
+}
+
+# Enable CORS for the avatar bucket
+resource "aws_s3_bucket_cors_configuration" "avatar_bucket_cors" {
+  bucket = aws_s3_bucket.avatar_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST"]
+    allowed_origins = [
+      "http://localhost:8080",
+      "http://localhost:8081",
+      "https://quantifyjiujitsu.com", 
+      "https://www.quantifyjiujitsu.com",
+      "https://dev.quantifyjiujitsu.com",
+      "https://staging.quantifyjiujitsu.com"
+    ]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+# Set lifecycle policy to clean up old objects
+resource "aws_s3_bucket_lifecycle_configuration" "avatar_bucket_lifecycle" {
+  bucket = aws_s3_bucket.avatar_bucket.id
+
+  rule {
+    id     = "delete-old-avatars"
+    status = "Enabled"
+    
+    # This filter matches all objects in the bucket
+    filter {
+      prefix = ""
+    }
+    
+    # Delete objects that are older than 365 days and have been replaced
+    # This helps clean up old avatars that are no longer used
+    expiration {
+      days = 365
+    }
+  }
+}
