@@ -68,4 +68,4 @@ qj_infra/
 ├── rds.tf              # RDS instance configurations
 ├── s3.tf               # S3 bucket configurations
 └── variables.tf        # Input variables
-```
+```# qj_db
